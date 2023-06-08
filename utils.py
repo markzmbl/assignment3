@@ -4,6 +4,7 @@ from sklearn.metrics import normalized_mutual_info_score
 from KMeans import KMeans
 from datetime import datetime
 from datetime import timedelta
+from KMeansLSH import KMeansLSH
 now = datetime.now
 
 
@@ -28,7 +29,11 @@ def benchmark(X, y, k, runs, max_iter, atol, method, title, **kwargs):
     acc_seconds = timedelta()
     acc_nmi = 0
     for i in range(runs):
-        model = KMeans(k, max_iter=max_iter, atol=atol, method=method, **kwargs)
+        if (method == 'LSH'):
+    
+            model = KMeansLSH(num_clusters=k, max_iterations=max_iter,distance_metric="euclidean", num_bands=2, num_rows=3, hash_width=200)
+        else:
+            model = KMeans(k, max_iter=max_iter, atol=atol, method=method, **kwargs)
         t0 = now()
         model.fit(X)
         t0 = now() - t0
