@@ -15,7 +15,11 @@ class KMeans:
             setattr(self, kw, kwarg)
 
     def fit(self, X):
-        if self.method == 'lyod':
+        if self.method in ('lyod', 'coresets'):
+
+            if self.method == 'coresets':
+                X = self._construct_coreset(X)
+
             self.centroids = self._initialize_centroids(X)
             
             for _ in range(self.max_iter):
@@ -33,7 +37,7 @@ class KMeans:
             pass     
 
     def predict(self, X):
-        if self.method == 'lyod':
+        if self.method in ('lyod', 'coresets'):
             distances = cdist(X, self.centroids)
             labels = np.argmin(distances, axis=1)
         elif self.method == 'lsh':
@@ -41,6 +45,14 @@ class KMeans:
         elif self.method == 'coresets':
             pass      
         return labels
+
+    def _construct_coreset(self, X):
+        coreset_indices = np.random.choice(
+            X.shape[0], size=self.samples,
+            replace=False
+        )
+        coreset_points = X[coreset_indices]
+        return coreset_points
 
     def _initialize_centroids(self, X):
         random_indices = np.random.choice(range(X.shape[0]), size=self.n_clusters, replace=False)
