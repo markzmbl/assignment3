@@ -3,7 +3,10 @@ from scipy.spatial.distance import cdist
 
 
 class KMeans:
-    def __init__(self, n_clusters, max_iter=100, atol=.1, method='lyod', **kwargs):
+    def __init__(
+            self, n_clusters, max_iter=100,
+            atol=.1, method='lyod', **kwargs
+    ):
         self.n_clusters = n_clusters
         self.max_iter = max_iter
         self.atol = atol
@@ -15,35 +18,27 @@ class KMeans:
             setattr(self, kw, kwarg)
 
     def fit(self, X):
-        if self.method in ('lyod', 'coresets'):
+        if self.method == 'coresets':
+            X = self._construct_coreset(X)
 
-            if self.method == 'coresets':
-                X = self._construct_coreset(X)
+        self.centroids = self._initialize_centroids(X)
+        
+        for _ in range(self.max_iter):
+            self.centroids_history.append(self.centroids)
+            labels = self._assign_labels(X, self.centroids)
+            new_centroids = self._update_centroids(X, labels)
 
-            self.centroids = self._initialize_centroids(X)
-            
-            for _ in range(self.max_iter):
-                self.centroids_history.append(self.centroids)
-                labels = self._assign_labels(X, self.centroids)
-                new_centroids = self._update_centroids(X, labels)
+            if np.allclose(
+                    new_centroids, self.centroids, atol=self.atol
+            ):
+                self.centroids_history.append(new_centroids)
+                break
 
-                if np.allclose(new_centroids, self.centroids, atol=self.atol):
-                    break
-
-                self.centroids = new_centroids
-        elif self.method == 'lsh':
-            pass
-        elif self.method == 'coresets':
-            pass     
+            self.centroids = new_centroids
 
     def predict(self, X):
-        if self.method in ('lyod', 'coresets'):
-            distances = cdist(X, self.centroids)
-            labels = np.argmin(distances, axis=1)
-        elif self.method == 'lsh':
-            pass
-        elif self.method == 'coresets':
-            pass      
+        distances = cdist(X, self.centroids)
+        labels = np.argmin(distances, axis=1)
         return labels
 
     def _construct_coreset(self, X):
@@ -55,7 +50,9 @@ class KMeans:
         return coreset_points
 
     def _initialize_centroids(self, X):
-        random_indices = np.random.choice(range(X.shape[0]), size=self.n_clusters, replace=False)
+        random_indices = np.random.choice(
+            range(X.shape[0]), size=self.n_clusters, replace=False
+        )
         centroids = X[random_indices]
         return centroids
 

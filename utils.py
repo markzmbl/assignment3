@@ -22,6 +22,8 @@ def convergence_plot(centroids_history):
 
     for history in centroid_distances.T:
         ax.plot(history)
+        ax.set_xlim(0, len(centroid_distances)-1)
+        ax.set_ylim(0)
     
     return fig, ax
 
@@ -30,16 +32,23 @@ def benchmark(X, y, k, runs, max_iter, atol, method, title, **kwargs):
     acc_nmi = 0
     for i in range(runs):
         if (method == 'LSH'):
-    
-            model = KMeansLSH(num_clusters=k, max_iterations=max_iter,distance_metric="euclidean", num_bands=2, num_rows=3, hash_width=200)
+            model = KMeansLSH(
+                num_clusters=k, max_iterations=max_iter,
+                distance_metric="euclidean", **kwargs
+            )
         else:
-            model = KMeans(k, max_iter=max_iter, atol=atol, method=method, **kwargs)
+            model = KMeans(
+                k, max_iter=max_iter, atol=atol,
+                method=method, **kwargs
+            )
         t0 = now()
         model.fit(X)
         t0 = now() - t0
         acc_seconds += t0
         iterations = len(model.centroids_history)
-        nmi = normalized_mutual_info_score(y, model.predict(X), average_method='arithmetic')
+        nmi = normalized_mutual_info_score(
+            y, model.predict(X), average_method='arithmetic'
+        )
         acc_nmi += nmi
         fig, ax = convergence_plot(model.centroids_history)
         ax.set_title(

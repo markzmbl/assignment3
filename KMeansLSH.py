@@ -2,15 +2,6 @@ import numpy as np
 from scipy.spatial import distance
 
 
-# class HashFunction():
-#     def __init__(self, hash_width, dimensions):
-#         self.hash_width = hash_width
-#         self.random_coefficients = np.random.randn(dimensions)
-#         self.random_bias = np.random.uniform() * hash_width
-
-#     def compute_hash(self, x):
-#         return int(np.dot(self.random_coefficients, x) + self.random_bias / self.hash_width)
-
 
 class HashFunction():
     def __init__(self, hash_width, dimensions):
@@ -41,9 +32,6 @@ class HashTable():
 
     def get_similar_items(self, x):
         return self.buckets.get(self.compute_hash(x), set())
-
-    def print_buckets(self):
-        print(self.buckets)
 
 class LocalitySensitiveHashing(): 
     def __init__(self, num_bands, num_rows, dimensions, hash_width, num_buckets=None, prime=None):
@@ -90,7 +78,7 @@ class KMeansLSH:
         indices = np.random.choice(X.shape[0], self.num_clusters, replace=False)
         self.centroids = X[indices]
         iteration_count = 0
-        for iteration in range(self.max_iterations):
+        for _ in range(self.max_iterations):
             iteration_count += 1
 
             # Get the data points assigned to each centroid using LSH
@@ -105,14 +93,11 @@ class KMeansLSH:
                 centroid_mean = np.mean(X[cluster_indices[i]], axis=0)
                 np.append(self.centroids,centroid_mean )
                 self.distance_computations += len(X) * self.num_clusters
-                self.centroids_history.append(self.centroids)            
+            self.centroids_history.append(self.centroids)            
 
             if np.all(np.equal(self.centroids, previous_centroids)):
-                print("Converged")
                 break
         
-        print("Total Iterations:", iteration_count)
-
     def predict(self, X):
         if self.centroids is None:
             raise ValueError("Fit the model before making predictions")
