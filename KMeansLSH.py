@@ -88,7 +88,6 @@ class KMeansLSH:
             previous_centroids = self.centroids.copy()
 
             # Compute new centroids
-            # self.centroids = [np.mean(X[cluster_indices[i]], axis=0) for i in range(self.num_clusters)]
             for i in range(self.num_clusters):
                 centroid_mean = np.mean(X[cluster_indices[i]], axis=0)
                 np.append(self.centroids,centroid_mean )
